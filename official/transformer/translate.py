@@ -168,18 +168,18 @@ def main(unused_argv):
       os.path.join(FLAGS.data_dir, FLAGS.vocab_file))
 
   if FLAGS.params == "base":
-    params = model_params.TransformerBaseParams
+    params = model_params.class_to_dict(model_params.TransformerBaseParams())
   elif FLAGS.params == "big":
-    params = model_params.TransformerBigParams
+    params = model_params.class_to_dict(model_params.TransformerBigParams())
   else:
     raise ValueError("Invalid parameter set defined: %s."
                      "Expected 'base' or 'big.'" % FLAGS.params)
 
   # Set up estimator and params
-  params.beam_size = _BEAM_SIZE
-  params.alpha = _ALPHA
-  params.extra_decode_length = _EXTRA_DECODE_LENGTH
-  params.batch_size = _DECODE_BATCH_SIZE
+  params["beam_size"] = _BEAM_SIZE
+  params["alpha"] = _ALPHA
+  params["extra_decode_length"] = _EXTRA_DECODE_LENGTH
+  params["batch_size"] = _DECODE_BATCH_SIZE
   estimator = tf.estimator.Estimator(
       model_fn=transformer_main.model_fn, model_dir=FLAGS.model_dir,
       params=params)

@@ -50,6 +50,11 @@ class TransformerBaseParams(object):
   beam_size = 4
   alpha = 0.6  # used to calculate length normalization in beam search
 
+  use_tpu = False
+
+  def create_dict(self):
+    return {key: value for key, value in self.__dict__.items()}
+
 
 class TransformerBigParams(TransformerBaseParams):
   """Parameters for the big Transformer model."""
@@ -57,3 +62,7 @@ class TransformerBigParams(TransformerBaseParams):
   hidden_size = 1024
   filter_size = 4096
   num_heads = 16
+
+
+def class_to_dict(cls):
+  return {key: getattr(cls, key) for key in dir(cls) if not key.startswith("_")}
