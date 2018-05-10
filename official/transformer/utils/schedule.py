@@ -72,3 +72,7 @@ class Manager(object):
     return "~{} epochs. ({} steps)".format(
         self._single_iteration_train_epochs,
         self.get_single_iteration_train_steps())
+
+  def repeat_dataset(self):
+    # TODO(robieta@): handle TPU case of steps > 1 epoch
+    return self._single_iteration_train_epochs

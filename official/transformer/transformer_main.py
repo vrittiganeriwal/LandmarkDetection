@@ -452,6 +452,8 @@ def run_transformer(flags_obj):
       use_tpu=params["use_tpu"]
   )
 
+  params["repeat_dataset"] = schedule_manager.repeat_dataset()
+
   # Create hooks that log information about the training and metric values
   train_hooks = hooks_helper.get_train_hooks(
       flags_obj.hooks,
