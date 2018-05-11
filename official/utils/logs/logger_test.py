@@ -31,50 +31,8 @@ from official.utils.logs import logger
 
 class BenchmarkLoggerTest(tf.test.TestCase):
 
-  def test_get_default_benchmark_logger(self):
-    self.assertIsInstance(logger.get_benchmark_logger(),
-                          logger.BaseBenchmarkLogger)
-
-  def test_config_base_benchmark_logger(self):
-    logger.config_benchmark_logger("")
-    self.assertIsInstance(logger.get_benchmark_logger(),
-                          logger.BaseBenchmarkLogger)
-
-  def test_config_benchmark_file_logger(self):
-    logger.config_benchmark_logger("/tmp/abc")
-    self.assertIsInstance(logger.get_benchmark_logger(),
-                          logger.BenchmarkFileLogger)
-
-
-class BaseBenchmarkLoggerTest(tf.test.TestCase):
-
   def setUp(self):
-    super(BaseBenchmarkLoggerTest, self).setUp()
-    self._actual_log = tf.logging.info
-    self.logged_message = None
-
-    def mock_log(*args, **kwargs):
-      self.logged_message = args
-      self._actual_log(*args, **kwargs)
-
-    tf.logging.info = mock_log
-
-  def tearDown(self):
-    super(BaseBenchmarkLoggerTest, self).tearDown()
-    tf.logging.info = self._actual_log
-
-  def test_log_metric(self):
-    log = logger.BaseBenchmarkLogger()
-    log.log_metric("accuracy", 0.999, global_step=1e4, extras={"name": "value"})
-
-    expected_log_prefix = "Benchmark metric:"
-    self.assertRegexpMatches(str(self.logged_message), expected_log_prefix)
-
-
-class BenchmarkFileLoggerTest(tf.test.TestCase):
-
-  def setUp(self):
-    super(BenchmarkFileLoggerTest, self).setUp()
+    super(BenchmarkLoggerTest, self).setUp()
     # Avoid pulling extra env vars from test environment which affects the test
     # result, eg. Kokoro test has a TF_PKG env which affect the test case
     # test_collect_tensorflow_environment_variables()
@@ -82,7 +40,7 @@ class BenchmarkFileLoggerTest(tf.test.TestCase):
     os.environ.clear()
 
   def tearDown(self):
-    super(BenchmarkFileLoggerTest, self).tearDown()
+    super(BenchmarkLoggerTest, self).tearDown()
     tf.gfile.DeleteRecursively(self.get_temp_dir())
     os.environ.clear()
     os.environ.update(self.original_environ)
@@ -91,12 +49,12 @@ class BenchmarkFileLoggerTest(tf.test.TestCase):
     non_exist_temp_dir = os.path.join(self.get_temp_dir(), "unknown_dir")
     self.assertFalse(tf.gfile.IsDirectory(non_exist_temp_dir))
 
-    logger.BenchmarkFileLogger(non_exist_temp_dir)
+    logger.BenchmarkLogger(non_exist_temp_dir)
     self.assertTrue(tf.gfile.IsDirectory(non_exist_temp_dir))
 
   def test_log_metric(self):
     log_dir = tempfile.mkdtemp(dir=self.get_temp_dir())
-    log = logger.BenchmarkFileLogger(log_dir)
+    log = logger.BenchmarkLogger(log_dir)
     log.log_metric("accuracy", 0.999, global_step=1e4, extras={"name": "value"})
 
     metric_log = os.path.join(log_dir, "metric.log")
@@ -111,7 +69,7 @@ class BenchmarkFileLoggerTest(tf.test.TestCase):
 
   def test_log_multiple_metrics(self):
     log_dir = tempfile.mkdtemp(dir=self.get_temp_dir())
-    log = logger.BenchmarkFileLogger(log_dir)
+    log = logger.BenchmarkLogger(log_dir)
     log.log_metric("accuracy", 0.999, global_step=1e4, extras={"name": "value"})
     log.log_metric("loss", 0.02, global_step=1e4)
 
@@ -132,9 +90,9 @@ class BenchmarkFileLoggerTest(tf.test.TestCase):
       self.assertEqual(loss["global_step"], 1e4)
       self.assertEqual(loss["extras"], [])
 
-  def test_log_non_number_value(self):
+  def test_log_non_nubmer_value(self):
     log_dir = tempfile.mkdtemp(dir=self.get_temp_dir())
-    log = logger.BenchmarkFileLogger(log_dir)
+    log = logger.BenchmarkLogger(log_dir)
     const = tf.constant(1)
     log.log_metric("accuracy", const)
 
@@ -146,8 +104,8 @@ class BenchmarkFileLoggerTest(tf.test.TestCase):
                    "global_step": 207082,
                    "accuracy": 0.9285}
     log_dir = tempfile.mkdtemp(dir=self.get_temp_dir())
-    log = logger.BenchmarkFileLogger(log_dir)
-    log.log_evaluation_result(eval_result)
+    log = logger.BenchmarkLogger(log_dir)
+    log.log_estimator_evaluation_result(eval_result)
 
     metric_log = os.path.join(log_dir, "metric.log")
     self.assertTrue(tf.gfile.Exists(metric_log))
@@ -167,8 +125,8 @@ class BenchmarkFileLoggerTest(tf.test.TestCase):
   def test_log_evaluation_result_with_invalid_type(self):
     eval_result = "{'loss': 0.46237424, 'global_step': 207082}"
     log_dir = tempfile.mkdtemp(dir=self.get_temp_dir())
-    log = logger.BenchmarkFileLogger(log_dir)
-    log.log_evaluation_result(eval_result)
+    log = logger.BenchmarkLogger(log_dir)
+    log.log_estimator_evaluation_result(eval_result)
 
     metric_log = os.path.join(log_dir, "metric.log")
     self.assertFalse(tf.gfile.Exists(metric_log))
@@ -179,32 +137,6 @@ class BenchmarkFileLoggerTest(tf.test.TestCase):
     self.assertNotEqual(run_info["tensorflow_version"], {})
     self.assertEqual(run_info["tensorflow_version"]["version"], tf.VERSION)
     self.assertEqual(run_info["tensorflow_version"]["git_hash"], tf.GIT_VERSION)
-
-  def test_collect_run_params(self):
-    run_info = {}
-    run_parameters = {
-        "batch_size": 32,
-        "synthetic_data": True,
-        "train_epochs": 100.00,
-        "dtype": "fp16",
-        "resnet_size": 50,
-        "random_tensor": tf.constant(2.0)
-    }
-    logger._collect_run_params(run_info, run_parameters)
-    self.assertEqual(len(run_info["run_parameters"]), 6)
-    self.assertEqual(run_info["run_parameters"][0],
-                     {"name": "batch_size", "long_value": 32})
-    self.assertEqual(run_info["run_parameters"][1],
-                     {"name": "dtype", "string_value": "fp16"})
-    self.assertEqual(run_info["run_parameters"][2],
-                     {"name": "random_tensor", "string_value":
-                          "Tensor(\"Const:0\", shape=(), dtype=float32)"})
-    self.assertEqual(run_info["run_parameters"][3],
-                     {"name": "resnet_size", "long_value": 50})
-    self.assertEqual(run_info["run_parameters"][4],
-                     {"name": "synthetic_data", "bool_value": "True"})
-    self.assertEqual(run_info["run_parameters"][5],
-                     {"name": "train_epochs", "float_value": 100.00})
 
   def test_collect_tensorflow_environment_variables(self):
     os.environ["TF_ENABLE_WINOGRAD_NONFUSED"] = "1"

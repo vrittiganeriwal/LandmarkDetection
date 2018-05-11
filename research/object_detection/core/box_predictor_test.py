@@ -49,7 +49,7 @@ class MaskRCNNBoxPredictorTest(tf.test.TestCase):
     mask_box_predictor = box_predictor.MaskRCNNBoxPredictor(
         is_training=False,
         num_classes=5,
-        fc_hyperparams_fn=self._build_arg_scope_with_hyperparams(),
+        fc_hyperparams=self._build_arg_scope_with_hyperparams(),
         use_dropout=False,
         dropout_keep_prob=0.5,
         box_code_size=4,
@@ -70,39 +70,12 @@ class MaskRCNNBoxPredictorTest(tf.test.TestCase):
       self.assertAllEqual(box_encodings_shape, [2, 1, 5, 4])
       self.assertAllEqual(class_predictions_with_background_shape, [2, 1, 6])
 
-  def test_get_boxes_with_five_classes_share_box_across_classes(self):
-    image_features = tf.random_uniform([2, 7, 7, 3], dtype=tf.float32)
-    mask_box_predictor = box_predictor.MaskRCNNBoxPredictor(
-        is_training=False,
-        num_classes=5,
-        fc_hyperparams_fn=self._build_arg_scope_with_hyperparams(),
-        use_dropout=False,
-        dropout_keep_prob=0.5,
-        box_code_size=4,
-        share_box_across_classes=True
-    )
-    box_predictions = mask_box_predictor.predict(
-        [image_features], num_predictions_per_location=[1],
-        scope='BoxPredictor')
-    box_encodings = box_predictions[box_predictor.BOX_ENCODINGS]
-    class_predictions_with_background = box_predictions[
-        box_predictor.CLASS_PREDICTIONS_WITH_BACKGROUND]
-    init_op = tf.global_variables_initializer()
-    with self.test_session() as sess:
-      sess.run(init_op)
-      (box_encodings_shape,
-       class_predictions_with_background_shape) = sess.run(
-           [tf.shape(box_encodings),
-            tf.shape(class_predictions_with_background)])
-      self.assertAllEqual(box_encodings_shape, [2, 1, 1, 4])
-      self.assertAllEqual(class_predictions_with_background_shape, [2, 1, 6])
-
   def test_value_error_on_predict_instance_masks_with_no_conv_hyperparms(self):
     with self.assertRaises(ValueError):
       box_predictor.MaskRCNNBoxPredictor(
           is_training=False,
           num_classes=5,
-          fc_hyperparams_fn=self._build_arg_scope_with_hyperparams(),
+          fc_hyperparams=self._build_arg_scope_with_hyperparams(),
           use_dropout=False,
           dropout_keep_prob=0.5,
           box_code_size=4,
@@ -113,11 +86,11 @@ class MaskRCNNBoxPredictorTest(tf.test.TestCase):
     mask_box_predictor = box_predictor.MaskRCNNBoxPredictor(
         is_training=False,
         num_classes=5,
-        fc_hyperparams_fn=self._build_arg_scope_with_hyperparams(),
+        fc_hyperparams=self._build_arg_scope_with_hyperparams(),
         use_dropout=False,
         dropout_keep_prob=0.5,
         box_code_size=4,
-        conv_hyperparams_fn=self._build_arg_scope_with_hyperparams(
+        conv_hyperparams=self._build_arg_scope_with_hyperparams(
             op_type=hyperparams_pb2.Hyperparams.CONV),
         predict_instance_masks=True)
     box_predictions = mask_box_predictor.predict(
@@ -135,7 +108,7 @@ class MaskRCNNBoxPredictorTest(tf.test.TestCase):
     mask_box_predictor = box_predictor.MaskRCNNBoxPredictor(
         is_training=False,
         num_classes=5,
-        fc_hyperparams_fn=self._build_arg_scope_with_hyperparams(),
+        fc_hyperparams=self._build_arg_scope_with_hyperparams(),
         use_dropout=False,
         dropout_keep_prob=0.5,
         box_code_size=4)
@@ -152,7 +125,7 @@ class MaskRCNNBoxPredictorTest(tf.test.TestCase):
       box_predictor.MaskRCNNBoxPredictor(
           is_training=False,
           num_classes=5,
-          fc_hyperparams_fn=self._build_arg_scope_with_hyperparams(),
+          fc_hyperparams=self._build_arg_scope_with_hyperparams(),
           use_dropout=False,
           dropout_keep_prob=0.5,
           box_code_size=4,
@@ -182,7 +155,7 @@ class RfcnBoxPredictorTest(tf.test.TestCase):
     rfcn_box_predictor = box_predictor.RfcnBoxPredictor(
         is_training=False,
         num_classes=2,
-        conv_hyperparams_fn=self._build_arg_scope_with_conv_hyperparams(),
+        conv_hyperparams=self._build_arg_scope_with_conv_hyperparams(),
         num_spatial_bins=[3, 3],
         depth=4,
         crop_size=[12, 12],
@@ -232,7 +205,7 @@ class ConvolutionalBoxPredictorTest(test_case.TestCase):
       conv_box_predictor = box_predictor.ConvolutionalBoxPredictor(
           is_training=False,
           num_classes=0,
-          conv_hyperparams_fn=self._build_arg_scope_with_conv_hyperparams(),
+          conv_hyperparams=self._build_arg_scope_with_conv_hyperparams(),
           min_depth=0,
           max_depth=32,
           num_layers_before_predictor=1,
@@ -261,7 +234,7 @@ class ConvolutionalBoxPredictorTest(test_case.TestCase):
       conv_box_predictor = box_predictor.ConvolutionalBoxPredictor(
           is_training=False,
           num_classes=0,
-          conv_hyperparams_fn=self._build_arg_scope_with_conv_hyperparams(),
+          conv_hyperparams=self._build_arg_scope_with_conv_hyperparams(),
           min_depth=0,
           max_depth=32,
           num_layers_before_predictor=1,
@@ -292,7 +265,7 @@ class ConvolutionalBoxPredictorTest(test_case.TestCase):
       conv_box_predictor = box_predictor.ConvolutionalBoxPredictor(
           is_training=False,
           num_classes=num_classes_without_background,
-          conv_hyperparams_fn=self._build_arg_scope_with_conv_hyperparams(),
+          conv_hyperparams=self._build_arg_scope_with_conv_hyperparams(),
           min_depth=0,
           max_depth=32,
           num_layers_before_predictor=1,
@@ -324,7 +297,7 @@ class ConvolutionalBoxPredictorTest(test_case.TestCase):
     conv_box_predictor = box_predictor.ConvolutionalBoxPredictor(
         is_training=False,
         num_classes=0,
-        conv_hyperparams_fn=self._build_arg_scope_with_conv_hyperparams(),
+        conv_hyperparams=self._build_arg_scope_with_conv_hyperparams(),
         min_depth=0,
         max_depth=32,
         num_layers_before_predictor=1,
@@ -371,7 +344,7 @@ class ConvolutionalBoxPredictorTest(test_case.TestCase):
     conv_box_predictor = box_predictor.ConvolutionalBoxPredictor(
         is_training=False,
         num_classes=0,
-        conv_hyperparams_fn=self._build_arg_scope_with_conv_hyperparams(),
+        conv_hyperparams=self._build_arg_scope_with_conv_hyperparams(),
         min_depth=0,
         max_depth=32,
         num_layers_before_predictor=1,
@@ -430,13 +403,8 @@ class WeightSharedConvolutionalBoxPredictorTest(test_case.TestCase):
         }
       }
       initializer {
-        random_normal_initializer {
-          stddev: 0.01
-          mean: 0.0
+        truncated_normal_initializer {
         }
-      }
-      batch_norm {
-        train: true,
       }
     """
     text_format.Merge(conv_hyperparams_text_proto, conv_hyperparams)
@@ -448,7 +416,7 @@ class WeightSharedConvolutionalBoxPredictorTest(test_case.TestCase):
       conv_box_predictor = box_predictor.WeightSharedConvolutionalBoxPredictor(
           is_training=False,
           num_classes=0,
-          conv_hyperparams_fn=self._build_arg_scope_with_conv_hyperparams(),
+          conv_hyperparams=self._build_arg_scope_with_conv_hyperparams(),
           depth=32,
           num_layers_before_predictor=1,
           box_code_size=4)
@@ -466,27 +434,6 @@ class WeightSharedConvolutionalBoxPredictorTest(test_case.TestCase):
     self.assertAllEqual(box_encodings.shape, [4, 320, 1, 4])
     self.assertAllEqual(objectness_predictions.shape, [4, 320, 1])
 
-  def test_bias_predictions_to_background_with_sigmoid_score_conversion(self):
-
-    def graph_fn(image_features):
-      conv_box_predictor = box_predictor.WeightSharedConvolutionalBoxPredictor(
-          is_training=True,
-          num_classes=2,
-          conv_hyperparams_fn=self._build_arg_scope_with_conv_hyperparams(),
-          depth=32,
-          num_layers_before_predictor=1,
-          class_prediction_bias_init=-4.6,
-          box_code_size=4)
-      box_predictions = conv_box_predictor.predict(
-          [image_features], num_predictions_per_location=[5],
-          scope='BoxPredictor')
-      class_predictions = tf.concat(box_predictions[
-          box_predictor.CLASS_PREDICTIONS_WITH_BACKGROUND], axis=1)
-      return (tf.nn.sigmoid(class_predictions),)
-    image_features = np.random.rand(4, 8, 8, 64).astype(np.float32)
-    class_predictions = self.execute(graph_fn, [image_features])
-    self.assertAlmostEqual(np.mean(class_predictions), 0.01, places=3)
-
   def test_get_multi_class_predictions_for_five_aspect_ratios_per_location(
       self):
 
@@ -495,7 +442,7 @@ class WeightSharedConvolutionalBoxPredictorTest(test_case.TestCase):
       conv_box_predictor = box_predictor.WeightSharedConvolutionalBoxPredictor(
           is_training=False,
           num_classes=num_classes_without_background,
-          conv_hyperparams_fn=self._build_arg_scope_with_conv_hyperparams(),
+          conv_hyperparams=self._build_arg_scope_with_conv_hyperparams(),
           depth=32,
           num_layers_before_predictor=1,
           box_code_size=4)
@@ -524,7 +471,7 @@ class WeightSharedConvolutionalBoxPredictorTest(test_case.TestCase):
       conv_box_predictor = box_predictor.WeightSharedConvolutionalBoxPredictor(
           is_training=False,
           num_classes=num_classes_without_background,
-          conv_hyperparams_fn=self._build_arg_scope_with_conv_hyperparams(),
+          conv_hyperparams=self._build_arg_scope_with_conv_hyperparams(),
           depth=32,
           num_layers_before_predictor=1,
           box_code_size=4)
@@ -553,7 +500,7 @@ class WeightSharedConvolutionalBoxPredictorTest(test_case.TestCase):
       conv_box_predictor = box_predictor.WeightSharedConvolutionalBoxPredictor(
           is_training=False,
           num_classes=num_classes_without_background,
-          conv_hyperparams_fn=self._build_arg_scope_with_conv_hyperparams(),
+          conv_hyperparams=self._build_arg_scope_with_conv_hyperparams(),
           depth=32,
           num_layers_before_predictor=2,
           box_code_size=4)
@@ -577,19 +524,19 @@ class WeightSharedConvolutionalBoxPredictorTest(test_case.TestCase):
         ('BoxPredictor/WeightSharedConvolutionalBoxPredictor/'
          'BoxEncodingPredictionTower/conv2d_0/weights'),
         ('BoxPredictor/WeightSharedConvolutionalBoxPredictor/'
-         'BoxEncodingPredictionTower/conv2d_0/BatchNorm/beta'),
+         'BoxEncodingPredictionTower/conv2d_0/biases'),
         ('BoxPredictor/WeightSharedConvolutionalBoxPredictor/'
          'BoxEncodingPredictionTower/conv2d_1/weights'),
         ('BoxPredictor/WeightSharedConvolutionalBoxPredictor/'
-         'BoxEncodingPredictionTower/conv2d_1/BatchNorm/beta'),
+         'BoxEncodingPredictionTower/conv2d_1/biases'),
         ('BoxPredictor/WeightSharedConvolutionalBoxPredictor/'
          'ClassPredictionTower/conv2d_0/weights'),
         ('BoxPredictor/WeightSharedConvolutionalBoxPredictor/'
-         'ClassPredictionTower/conv2d_0/BatchNorm/beta'),
+         'ClassPredictionTower/conv2d_0/biases'),
         ('BoxPredictor/WeightSharedConvolutionalBoxPredictor/'
          'ClassPredictionTower/conv2d_1/weights'),
         ('BoxPredictor/WeightSharedConvolutionalBoxPredictor/'
-         'ClassPredictionTower/conv2d_1/BatchNorm/beta'),
+         'ClassPredictionTower/conv2d_1/biases'),
         ('BoxPredictor/WeightSharedConvolutionalBoxPredictor/'
          'BoxEncodingPredictor/weights'),
         ('BoxPredictor/WeightSharedConvolutionalBoxPredictor/'
@@ -606,7 +553,7 @@ class WeightSharedConvolutionalBoxPredictorTest(test_case.TestCase):
     conv_box_predictor = box_predictor.WeightSharedConvolutionalBoxPredictor(
         is_training=False,
         num_classes=0,
-        conv_hyperparams_fn=self._build_arg_scope_with_conv_hyperparams(),
+        conv_hyperparams=self._build_arg_scope_with_conv_hyperparams(),
         depth=32,
         num_layers_before_predictor=1,
         box_code_size=4)

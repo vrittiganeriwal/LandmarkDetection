@@ -1,0 +1,7 @@
+data/small_data_radhu_features/i1.delf
+data/small_data_radhu_features/i2.delf
+data/small_data_radhu_features/i3.delf
+data/small_data_radhu_features/i4.delf
+data/small_data_radhu_features/i5.delf
+data/small_data_radhu_features/i6.delf
+data/small_data_radhu_features/i7.delf

@@ -17,6 +17,8 @@
 
 counts_file="data/glyph_5000_teachers.npy"
 output_dir="figures/"
+executable1="python rdp_bucketized.py"
+executable2="python rdp_cumulative.py"
 
 mkdir -p $output_dir
 
@@ -25,19 +27,18 @@ if [ ! -d "$output_dir" ]; then
   exit 1
 fi
 
-python rdp_bucketized.py \
+$executable1 \
   --plot=small \
   --counts_file=$counts_file \
   --plot_file=$output_dir"noisy_thresholding_check_perf.pdf"
 
-python rdp_bucketized.py \
+$executable1 \
   --plot=large \
   --counts_file=$counts_file \
   --plot_file=$output_dir"noisy_thresholding_check_perf_details.pdf"
 
-python rdp_cumulative.py \
+
+$executable2 \
   --cache=False \
   --counts_file=$counts_file \
   --figures_dir=$output_dir
-
-python utility_queries_answered.py --plot_file=$output_dir"utility_queries_answered.pdf"

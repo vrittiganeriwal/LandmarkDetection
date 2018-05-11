@@ -1,0 +1,7 @@
+data/small_data_radhu/i1.jpg
+data/small_data_radhu/i2.jpg
+data/small_data_radhu/i3.jpg
+data/small_data_radhu/i4.jpg
+data/small_data_radhu/i5.jpg
+data/small_data_radhu/i6.jpg
+data/small_data_radhu/i7.jpg

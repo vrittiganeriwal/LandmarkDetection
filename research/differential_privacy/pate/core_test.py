@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 
-"""Tests for pate.core."""
+"""Tests for google3.experimental.brain.privacy.pate.pate."""
 
 from __future__ import absolute_import
 from __future__ import division

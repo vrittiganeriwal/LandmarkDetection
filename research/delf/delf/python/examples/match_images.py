@@ -62,6 +62,8 @@ def main(unused_argv):
   _, indices = d1_tree.query(
       descriptors_2, distance_upper_bound=_DISTANCE_THRESHOLD)
 
+
+
   # Select feature locations for putative matches.
   locations_2_to_use = np.array([
       locations_2[i,]
@@ -87,8 +89,10 @@ def main(unused_argv):
   # Visualize correspondences, and save to file.
   _, ax = plt.subplots()
   img_1 = mpimg.imread(cmd_args.image_1_path)
+  print(type(img_1))
   img_2 = mpimg.imread(cmd_args.image_2_path)
   inlier_idxs = np.nonzero(inliers)[0]
+
   plot_matches(
       ax,
       img_1,

@@ -53,9 +53,15 @@ def _ReadImageList(list_path):
   Returns:
     image_paths: List of image paths.
   """
-  with tf.gfile.GFile(list_path, 'r') as f:
-    image_paths = f.readlines()
-  image_paths = [entry.rstrip() for entry in image_paths]
+  # with tf.gfile.GFile(list_path, 'r') as f:
+  #   image_paths = f.readlines()
+  # image_paths = [entry.rstrip() for entry in image_paths]
+  # return image_paths
+
+  image_paths=[]
+  for dir, subdir, files in os.walk(list_path):
+      for file in files:
+          image_paths.append(os.path.join(dir, file))
   return image_paths
 
 

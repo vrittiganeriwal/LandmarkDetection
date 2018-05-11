@@ -19,14 +19,11 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+
 import os
 import shutil
 import sys
 import tempfile
-
-from absl import flags
-
-from official.utils.flags import core as flags_core
 
 
 def run_synthetic(main, tmp_root, extra_flags=None, synth=True, max_train=1):
@@ -58,8 +55,7 @@ def run_synthetic(main, tmp_root, extra_flags=None, synth=True, max_train=1):
     args.extend(["--max_train_steps", str(max_train)])
 
   try:
-    flags_core.parse_flags(argv=args)
-    main(flags.FLAGS)
+    main(args)
   finally:
     if os.path.exists(model_dir):
       shutil.rmtree(model_dir)
