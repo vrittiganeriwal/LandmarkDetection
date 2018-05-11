@@ -11,7 +11,7 @@ Deep Local Features (DeLF)
 Install tensorflow using virtual environment
 Clone this repository
 Commands : 
-1) cd models/research/ 
+1) cd research 
 2) export PYTHONPATH=$PYTHONPATH:pwd 
 3) cd delf/delf/python/examples/ 
 4) python3 extract_features.py --config_path delf_config_example.pbtxt --list_images_path data/small_data_radhu --output_dir data/small_data_radhu_features
