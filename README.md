@@ -15,4 +15,4 @@ Commands :
 2) export PYTHONPATH=$PYTHONPATH:pwd 
 3) cd delf/delf/python/examples/ 
 4) python3 extract_features.py --config_path delf_config_example.pbtxt --list_images_path data/small_data_radhu --output_dir data/small_data_radhu_features
-
+5) python3 match_images_small_data.py   --test_image_path data/small_test_data_radhu/Burj_al_Arab.jpg   --test_features_path data/small_test_data_radhu_features/Burj_al_Arab.delf   --list_images_path data/small_data_radhu   --list_images_features_path data/small_data_radhu_features   --output_image data/small_test_radhu_output_1
